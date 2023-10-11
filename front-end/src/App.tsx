@@ -2,6 +2,7 @@ import React from 'react';
 import './App.css'; // import the css file to enable your styles.
 import { GameState, Cell } from './game';
 import BoardCell from './Cell';
+import { createCallSignature } from 'typescript';
 
 /**
  * Define the type of the props field for a React component
@@ -34,8 +35,9 @@ class App extends React.Component<Props, GameState> {
     /**
      * state has type GameState as specified in the class inheritance.
      */
-    this.state = { cells: [] }
+    this.state = { cells: [], winner: null}
   }
+
 
   /**
    * Use arrow function, i.e., () => {} to create an async function,
@@ -44,6 +46,17 @@ class App extends React.Component<Props, GameState> {
    */
   newGame = async () => {
     const response = await fetch('/newgame');
+    const json = await response.json();
+    this.setState({ cells: json['cells'] });
+  }
+
+  /**
+   * Use arrow function, i.e., () => {} to create an async function,
+   * otherwise, 'this' would become undefined in runtime. This is
+   * just an issue of Javascript.
+   */
+   undo = async () => {
+    const response = await fetch('/undo');
     const json = await response.json();
     this.setState({ cells: json['cells'] });
   }
@@ -61,9 +74,17 @@ class App extends React.Component<Props, GameState> {
       e.preventDefault();
       const response = await fetch(`/play?x=${x}&y=${y}`)
       const json = await response.json();
-      this.setState({ cells: json['cells'] });
+      this.setState({ cells: json['cells'], winner: json['winner'] });
     }
   }
+
+  displayWinner() {
+    if (this.state.winner != null) {
+      return "a" + this.state.winner.toString() + "b"
+    }
+    return "noWinner"
+  }
+
 
   createCell(cell: Cell, index: number): React.ReactNode {
     if (cell.playable)
@@ -84,7 +105,27 @@ class App extends React.Component<Props, GameState> {
       return (
         <div key={index}><BoardCell cell={cell}></BoardCell></div>
       )
-  }
+    }
+
+    countActionCells(cells : Cell[]) {
+      let count = 0
+      for (let i = 0; i < cells.length; i++) {
+        const cell = cells[i]
+        if (cell.playable) {
+          count++
+        }
+      }
+      return count
+    }
+
+    getCurrentPlayer(count: number, cells : Cell[]) {
+      if (count % 2 === 1) {
+        return "Player X's turn"
+      }
+      return "Player O's turn"
+    }
+
+    
 
   /**
    * This function will call after the HTML is rendered.
@@ -115,13 +156,21 @@ class App extends React.Component<Props, GameState> {
      */
     return (
       <div>
+        <div id="instructions">
+          <div>
+            {this.getCurrentPlayer(this.countActionCells(this.state.cells), this.state.cells)}
+          </div>
+          <div>
+            {this.displayWinner()}
+          </div>
+        </div>
         <div id="board">
           {this.state.cells.map((cell, i) => this.createCell(cell, i))}
         </div>
         <div id="bottombar">
           <button onClick={/* get the function, not call the function */this.newGame}>New Game</button>
           {/* Exercise: implement Undo function */}
-          <button>Undo</button>
+          <button onClick={this.undo}>Undo</button>
         </div>
       </div>
     );

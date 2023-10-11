@@ -1,5 +1,6 @@
 interface GameState {
   cells: Cell[];
+  winner: number | null;
 }
 
 interface Cell {
@@ -7,6 +8,7 @@ interface Cell {
   playable: boolean;
   x: number;
   y: number;
+  
 }
 
 export type { GameState, Cell }

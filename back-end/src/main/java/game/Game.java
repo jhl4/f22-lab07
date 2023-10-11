@@ -22,15 +22,18 @@ public class Game {
         this(new Board(), Player.PLAYER0);
     }
 
+    
     public Game(Board board, Player nextPlayer) {
         this(board, nextPlayer, List.of());
     }
+    
 
     public Game(Board board, Player nextPlayer, List<Game> history) {
         this.board = board;
         this.player = nextPlayer;
         this.history = history;
     }
+
 
     public Board getBoard() {
         return this.board;
@@ -49,6 +52,14 @@ public class Game {
         newHistory.add(this);
         Player nextPlayer = this.player == Player.PLAYER0 ? Player.PLAYER1 : Player.PLAYER0;
         return new Game(this.board.updateCell(x, y, this.player), nextPlayer, newHistory);
+    }
+
+    public Game undo() {
+        if (this.getWinner() != null)
+            return this;
+        Game lastGame = this.history.get(this.history.size() - 1);
+        Player lastPlayer = this.player == Player.PLAYER0 ? Player.PLAYER1 : Player.PLAYER0;
+        return new Game(lastGame.board, lastPlayer, lastGame.history);
     }
 
     public Player getWinner() {
