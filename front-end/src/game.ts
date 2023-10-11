@@ -1,6 +1,6 @@
 interface GameState {
   cells: Cell[];
-  winner: number | null;
+  winner: number;
 }
 
 interface Cell {

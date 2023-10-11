@@ -35,7 +35,7 @@ class App extends React.Component<Props, GameState> {
     /**
      * state has type GameState as specified in the class inheritance.
      */
-    this.state = { cells: [], winner: null}
+    this.state = { cells: [], winner: 2}
   }
 
 
@@ -74,13 +74,16 @@ class App extends React.Component<Props, GameState> {
       e.preventDefault();
       const response = await fetch(`/play?x=${x}&y=${y}`)
       const json = await response.json();
-      this.setState({ cells: json['cells'], winner: json['winner'] });
+      this.setState({ cells: json['cells']});
+      this.setState({ winner: json['winner']});
     }
   }
 
   displayWinner() {
-    if (this.state.winner != null) {
-      return "a" + this.state.winner.toString() + "b"
+    if (this.state.winner == 0) {
+      return "Winner is X";
+    } else if (this.state.winner == 1) {
+      return "Winner is X0";
     }
     return "noWinner"
   }
